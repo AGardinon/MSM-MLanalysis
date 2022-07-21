@@ -141,6 +141,20 @@ class TrajLoader(trajectoryHandler):
             for snap in ase_traj:
                 snap.numbers = self.Znumbers
         return ase_traj
+
+    
+    def readTrajCOM(self,saveFile=False):
+        print(f"\n--- Loading traj {self.readFrames} (COM) ---\n")
+        b,e,s = self.readFrames
+        ase_traj = read(self.dirname+self.sysname, index=f'{b}:{e}:{s}')
+        ase_traj_COM = aA.extract_molecs_molID(ase_traj, 
+                        molID=self.atMolID, fct=self.RcutCorrectionDict)
+        if saveFile:
+            interval_str = '-'.join(map(str,self.readFrames))
+            write('COM_traj_'+interval_str+'.xyz', ase_traj_COM)
+            # !!! TODO ADD THE MOL INFORMSTION ON THE FILE WITH COMs
+#            np.savetxt('molSym_keys.txt', self.molSym)
+        return ase_traj_COM
     
     
     def trajUnwrapper(self,frame_tuple,species,method='hybrid',traj=None):

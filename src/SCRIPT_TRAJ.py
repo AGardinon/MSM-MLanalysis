@@ -74,10 +74,10 @@ trajObj = pT.TrajLoader(**traj_dict)
 
 # - Reading the amounts of frames needed
 t0 = time.time()
-traj_read = trajObj.readTraj()
+#traj_read = trajObj.readTraj()
+traj_read = trajObj.readTrajCOM(saveFile=True)
 t1 = time.time()
 print(f"{np.round(t1-t0, 1)}s")
-
 
 # --- 2. Descriptor
 
