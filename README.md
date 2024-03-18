@@ -1,5 +1,7 @@
 # MSM-MLanalysis
 
+**Under contruction :(**
+
 The MSM-analysis workflow takes as input a "trajectory" and applies a MSM routine to extract the relevant dynamic states (whithin the markovian theoretical framework).
 This repository contains tools and utils to apply the a MSM type of analysis on the data coming from MD simulations.
 
@@ -13,5 +15,10 @@ The MSM is built by scanning a series of lag-times (_e.g._ as defined in the `.j
 3.  the tICA space is discretised in many domains, _e.g._, first guess on the discrete dynamic domains (the trajectory becomes the time evolution of these labels)
 4.  a first MSM is built on the time-evolution of these discretised states
 5.  PCCA+ is employed to merge togheters a number of dynamic states (defined by either `eigenval_treshold` or `fixed_eigensates` in the `.json`)
+
+To run such cycle on given descriptor files one can use the command:
+```bash
+python msmanalysis.py -c msm_confing.json
+```
 
 The information gathered by the MSM cycle is used to get the optimal lag-time $\tau^*$ and the corresponding amount of CG-dynamic states (_i.e._ PCCA+ reduced states).
