@@ -1,0 +1,18 @@
+{
+    "dirname": "/path/to/mydir/",
+    "sysname": "traj.xyz",
+    "read_frame_tuple": [0,250,1],
+
+    "traj_species_dict": {
+        "rcut_correction": {"H":1, "C":1, "O":1, "Li":0.1, "P":1, "F":1},
+        "molecular_species:": ["EC", "EMC", "Li", "PF6"]
+    },
+
+    "zshift_tuple": ["EC", [6, 8]],
+
+    "unwrap_dict": {
+        "species": ["Li", "PF6"],
+        "method": "hybrid"
+    }
+
+}
