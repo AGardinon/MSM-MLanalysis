@@ -9,7 +9,7 @@ import numpy as np
 import math
 from ase.io import read, write
 from tqdm import tqdm
-import anaAtoms as aA
+from . import anaAtoms as aA
 
 # ------------------------------
 #
