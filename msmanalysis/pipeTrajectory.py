@@ -11,6 +11,8 @@ from ase.io import read, write
 from tqdm import tqdm
 from . import anaAtoms as aA
 
+from typing import Tuple, List, Union
+
 # ------------------------------
 #
 # Functions
@@ -83,7 +85,7 @@ class trajectoryHandler:
 
 class TrajLoader(trajectoryHandler):
     def __init__(self, dirname, sysname, read_frame_tuple, 
-                 traj_species_dict, zshift_tuple, unwrap_dict):
+                 traj_species_dict, zshift_dict, unwrap_dict):
         super().__init__(dirname, sysname, read_frame_tuple)
 
         print('\n# --- Init the trajectory')
@@ -97,28 +99,52 @@ class TrajLoader(trajectoryHandler):
         frameZeroMol = aA.extract_molecs(frameZero[:1], fct=self.RcutCorrectionDict)
         self.atMolID = frameZero[0].arrays['molID']
         self.molSym = frameZeroMol[0].arrays['molSym']
-        self.Znumbers = frameZero[0].numbers
-        # VVB thing
-        self.__OldZnumbers = frameZero[0].numbers
+        self.Znumbers = frameZero[0].numbers.copy()
+        # Store Original Znumbers list
+        self.OriginalZnumbers = frameZero[0].numbers.copy()
         
         # shifting mumbojumbo
-        if zshift_tuple:
-            self._mol_shifted = zshift_tuple[0]
-            self._Z_shifted = zshift_tuple[1]
-            shift_ = np.max(self.Znumbers)
+        if zshift_dict:
+            self.ZnumberShift(**zshift_dict)
 
-            # loop inside the moltypes and select the right type
-            for idx, m in enumerate(self.molSym):
-                if m == self._mol_shifted:
-                    # create a mask
-                    mask = self.atMolID == idx
-                    for i,ture in enumerate(mask):
-                        if ture:
-                            if self.Znumbers[i] in self._Z_shifted:
-                                self.Znumbers[i] += shift_
-                            else:
-                                pass
-                            
+
+    def ZnumberShift(self,
+                     mol_to_shift: str, 
+                     z_to_shift: List[int],
+                     shifting: Union[str,dict]='max'):
+        
+        max_z_shift = np.max(self.Znumbers)
+
+        if isinstance(shifting, str):
+            assert shifting == 'max', "Shifting can only be set to `max` (the max value of Z in the box) or dict map."
+
+        # loop inside the moltypes and select the right type
+        for idx, m in enumerate(self.molSym):
+            if m == mol_to_shift:
+                # create a mask for the atoms with that mol index
+                mask = self.atMolID == idx
+
+                for i,positive in enumerate(mask):
+                    if positive:
+                        if self.Znumbers[i] in z_to_shift:
+                            # max shifting by dafault
+                            self.Znumbers[i] += max_z_shift
+                    # if not positive
+                    else:
+                        pass
+
+        # map to specific values if requested            
+        if isinstance(shifting, dict):
+            dict_keys = set(shifting.keys())
+            required_keys = set(z_to_shift)
+            assert dict_keys == required_keys, "Shifting dictionary keys do not match the required elements provided in `z_to_shift`"
+            # shift the keys for the max
+            new_shifting_dict = {key + max_z_shift: value for key, value in shifting.items()}
+            # change numbers with given keys
+            z_mapped_list = [new_shifting_dict.get(num, num) for num in self.Znumbers]
+            self.Znumbers = np.array(z_mapped_list)
+
+
             
     def readFrame(self,n_frame,Zdiff=True):
         ase_frame = read(self.dirname+self.sysname, index=f'{n_frame}:{n_frame+1}')[0]
